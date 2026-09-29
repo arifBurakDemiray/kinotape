@@ -36,9 +36,11 @@ You need [Go](https://go.dev/dl/) 1.26 or newer.
 ```sh
 git clone https://github.com/arifBurakDemiray/kinotape.git
 cd kinotape
-./build.sh           # writes dist/Kinotape-macOS.zip and dist/Kinotape.exe (macOS or Linux)
-./build.sh install   # also puts Kinotape.app in ~/Applications (macOS)
+./build.sh           # on a Mac: writes dist/Kinotape-macOS.zip and dist/Kinotape.exe
+./build.sh install   # also puts Kinotape.app in ~/Applications
 ```
+
+On Windows, build the app directly with `go build -ldflags "-H=windowsgui" -o Kinotape.exe .`
 
 To try it without building an app, run `go run . serve` and open http://127.0.0.1:8765/.
 
