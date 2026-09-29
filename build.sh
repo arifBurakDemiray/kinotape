@@ -6,7 +6,7 @@
 set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
-VERSION="${VERSION:-2.0.0}"
+VERSION="${VERSION:-1.0.0}"
 DIST=dist
 WORK="$(mktemp -d)"
 APP="$WORK/Kinotape.app"

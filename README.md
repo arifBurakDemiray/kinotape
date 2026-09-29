@@ -29,6 +29,10 @@ Kinotape needs two things installed:
 - **ffmpeg**, for thumbnails, lengths and subtitles. On macOS run `brew install ffmpeg`. On Windows run `winget install ffmpeg`, or put `ffmpeg.exe` and `ffprobe.exe` next to `Kinotape.exe`.
 - **Chrome, Edge or Brave**, which Kinotape uses as its app window. Other browsers work if you open the address yourself.
 
+### Download
+
+Get the latest version from [Releases](https://github.com/arifBurakDemiray/kinotape/releases/latest): `Kinotape-macOS.zip` for macOS (Apple Silicon and Intel) or `Kinotape.exe` for Windows.
+
 ### Build from source
 
 You need [Go](https://go.dev/dl/) 1.26 or newer.
