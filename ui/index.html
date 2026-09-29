@@ -1,0 +1,1686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Kinotape</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='4' y='4' width='56' height='56' rx='15' fill='%2323408F'/%3E%3Cpath d='M26.5 20v21l17-10.5z' fill='%23F7F8FB' stroke='%23F7F8FB' stroke-width='4' stroke-linejoin='round'/%3E%3Crect x='18' y='47' width='28' height='3.6' rx='1.8' fill='%23F7F8FB' fill-opacity='.3'/%3E%3Crect x='18' y='47' width='17' height='3.6' rx='1.8' fill='%23F6B62E'/%3E%3Ccircle cx='35' cy='48.8' r='3.3' fill='%23F6B62E' stroke='%23F7F8FB' stroke-width='1.4'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --paper: #F4F6FA;
+    --surface: #FFFFFF;
+    --ink: #121A2C;
+    --ink-2: #4B566B;
+    --ink-3: #647086;
+    --rule: #DCE1EA;
+    --track: #E4E8F0;
+    --indigo: #274690;
+    --indigo-strong: #1D3677;
+    --on-indigo: #FFFFFF;
+    --saffron: #D08A00;
+    --saffron-ink: #8F5C00;
+    --watched: #274690;
+    --danger: #B42318;
+    --shadow-sm: 0 1px 2px rgba(18, 26, 44, .06);
+    --shadow: 0 1px 2px rgba(18, 26, 44, .05), 0 12px 32px rgba(18, 26, 44, .08);
+    --ring: 0 0 0 3px rgba(39, 70, 144, .35);
+    --display: "Avenir Next Condensed", "Bahnschrift Condensed", "Bahnschrift", "Roboto Condensed", system-ui, sans-serif;
+    --numeric: "DIN Alternate", "Bahnschrift", "Roboto Mono", ui-monospace, monospace;
+    --tall-numeric: "DIN Condensed", "Bahnschrift Condensed", "Bahnschrift", "Avenir Next Condensed", sans-serif;
+    --body: system-ui, -apple-system, "Segoe UI", "Helvetica Neue", sans-serif;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0C1120;
+      --surface: #141B2D;
+      --ink: #E8ECF4;
+      --ink-2: #A7B1C4;
+      --ink-3: #8390A6;
+      --rule: #222B41;
+      --track: #1F2840;
+      --indigo: #86A6F2;
+      --indigo-strong: #A5BDF6;
+      --on-indigo: #0C1120;
+      --saffron: #F4B42C;
+      --saffron-ink: #F4B42C;
+      --watched: #5E7BC4;
+      --danger: #F97066;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 14px 36px rgba(0, 0, 0, .4);
+      --ring: 0 0 0 3px rgba(134, 166, 242, .45);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; }
+  body { background: var(--paper); color: var(--ink); font: 15px/1.45 var(--body); -webkit-font-smoothing: antialiased; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  a { color: inherit; }
+  img { display: block; }
+  :focus { outline: none; }
+  :focus-visible { box-shadow: var(--ring); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+  .bar { display: flex; align-items: center; gap: 24px; height: 68px; }
+  .mark { font: 800 26px/1 var(--display); font-stretch: condensed; letter-spacing: .01em; text-decoration: none; }
+  .search { position: relative; flex: 1 1 auto; max-width: 520px; }
+  .search svg { position: absolute; left: 12px; top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--ink-3); pointer-events: none; }
+  .search input { width: 100%; height: 40px; padding: 0 12px 0 36px; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-sm); }
+  .search input::placeholder { color: var(--ink-3); }
+  .bar-end { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .status { font: 700 13px/1 var(--numeric); color: var(--ink-3); letter-spacing: .02em; white-space: nowrap; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); box-shadow: var(--shadow-sm); font-weight: 600; white-space: nowrap; text-decoration: none; }
+  .btn:hover { border-color: color-mix(in srgb, var(--ink) 25%, var(--rule)); }
+  .btn.primary { background: var(--indigo); border-color: var(--indigo); color: var(--on-indigo); }
+  .btn.primary:hover { background: var(--indigo-strong); border-color: var(--indigo-strong); }
+  .btn.big { height: 50px; padding: 0 24px; font-size: 17px; border-radius: 10px; }
+  .btn.ghost { background: transparent; box-shadow: none; border-color: transparent; color: var(--ink-2); }
+  .btn.ghost:hover { background: var(--surface); border-color: var(--rule); }
+  .btn.danger { color: var(--danger); }
+  .btn[disabled] { opacity: .55; cursor: default; }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn.big svg { width: 18px; height: 18px; }
+  .link { border: 0; background: none; padding: 6px 2px; border-radius: 6px; color: var(--ink-2); font-size: 13px; text-decoration: none; }
+  .link:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+  .label { margin: 0; font: 600 12px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  .notice { margin: 4px 0 20px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--rule); background: var(--surface); box-shadow: var(--shadow-sm); color: var(--ink-2); font-size: 14px; }
+  .notice strong { color: var(--ink); }
+  code { font: 13px/1.3 ui-monospace, "SF Mono", Consolas, monospace; }
+
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 44px; align-items: center; padding: 16px 0 4px; }
+  .eyebrow { margin: 0 0 14px; font: 600 12px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--saffron-ink); }
+  .show-title { margin: 0; font: 700 clamp(40px, 5.4vw, 68px)/.94 var(--display); font-stretch: condensed; letter-spacing: -.005em; text-wrap: balance; }
+  .facts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; }
+  .fact { font: 700 13px/1 var(--numeric); color: var(--ink-3); letter-spacing: .02em; }
+  .chip { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink-2); font-size: 12.5px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  a.chip:hover, button.chip:hover { border-color: var(--indigo); color: var(--indigo); }
+  button.chip[aria-pressed="true"] { background: var(--indigo); border-color: var(--indigo); color: var(--on-indigo); }
+  .overview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin: 14px 0 0; max-width: 60ch; color: var(--ink-2); }
+  .ep-line { margin: 18px 0 0; font-size: 19px; line-height: 1.3; }
+  .ep-code { margin-right: 10px; font: 700 17px/1 var(--numeric); letter-spacing: .04em; color: var(--ink-2); }
+  .meta { margin: 8px 0 0; font: 700 14px/1.2 var(--numeric); letter-spacing: .02em; color: var(--ink-3); }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+  .back { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 8px; }
+  .back svg { width: 16px; height: 16px; }
+
+  .still { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--track); box-shadow: var(--shadow); }
+  .still img, .ep-still img, .wide-still img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ph { position: absolute; inset: 0; display: grid; place-items: center; font: 700 88px/1 var(--tall-numeric); font-stretch: condensed; color: var(--ink-3); opacity: .55; }
+  .play-badge { position: absolute; left: 18px; bottom: 24px; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); transition: transform .15s ease; }
+  .play-badge svg { width: 22px; height: 22px; margin-left: 3px; }
+  .still:hover .play-badge { transform: scale(1.07); }
+  .pos { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(12, 17, 32, .45); }
+  .pos i { display: block; height: 100%; width: calc(var(--p) * 100%); background: var(--saffron); }
+
+  .row { margin-top: 40px; }
+  .row-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .row-title { margin: 0; font: 700 24px/1 var(--display); font-stretch: condensed; }
+  .row-count { font: 700 13px/1 var(--numeric); color: var(--ink-3); }
+  .scroller { display: flex; gap: 16px; overflow-x: auto; padding: 4px 4px 12px; margin: 0 -4px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 22px 16px; }
+  .poster { flex: none; width: 164px; display: block; text-decoration: none; scroll-snap-align: start; }
+  .grid .poster { width: auto; }
+  .poster-art { position: relative; display: block; aspect-ratio: 2 / 3; border-radius: 10px; overflow: hidden; background: var(--track); box-shadow: var(--shadow-sm); transition: transform .15s ease, box-shadow .15s ease; }
+  .poster:hover .poster-art, .poster:focus-visible .poster-art { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .poster:focus-visible { box-shadow: none; }
+  .poster:focus-visible .poster-art { box-shadow: var(--ring); }
+  .poster-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .poster-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; background: color-mix(in srgb, var(--indigo) 16%, var(--surface)); }
+  .poster-fallback strong { font: 700 22px/1 var(--display); font-stretch: condensed; overflow-wrap: anywhere; }
+  .poster-fallback span { display: block; margin-top: 6px; font: 700 12px/1 var(--numeric); color: var(--ink-3); }
+  .poster-title { display: block; margin-top: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .poster-meta { display: block; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; color: var(--ink-3); }
+  .mini { display: block; height: 3px; margin-top: 8px; border-radius: 2px; background: var(--track); overflow: hidden; }
+  .mini i { display: block; height: 100%; width: calc(var(--p) * 100%); background: var(--saffron); }
+  .wide { flex: none; width: 300px; display: block; text-decoration: none; text-align: left; padding: 0; border: 0; background: none; scroll-snap-align: start; }
+  .wide-still { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: var(--track); box-shadow: var(--shadow-sm); }
+  .wide-still .ph { font-size: 44px; }
+  .wide:hover .wide-still { box-shadow: var(--shadow); }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 40px; }
+  .seg { display: inline-flex; padding: 3px; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); }
+  .seg button { height: 32px; padding: 0 12px; border: 0; border-radius: 7px; background: none; color: var(--ink-2); font-size: 13.5px; font-weight: 600; }
+  .seg button[aria-pressed="true"] { background: var(--indigo); color: var(--on-indigo); }
+  .results-episodes { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .result-ep { display: flex; align-items: center; gap: 14px; width: 100%; padding: 8px; border: 1px solid transparent; border-radius: 10px; background: none; text-align: left; }
+  .result-ep:hover { background: var(--surface); border-color: var(--rule); }
+  .result-ep .wide-still { width: 128px; flex: none; }
+  .result-ep strong { display: block; font-weight: 600; }
+  .result-ep span { font-size: 13px; color: var(--ink-3); }
+
+  .tape { margin: 36px 0 0; }
+  .tape-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .tape-count { font: 700 13px/1 var(--numeric); color: var(--ink-3); letter-spacing: .02em; }
+  .tape-track { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
+  .tape-track li { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .tape-track li.season-gap { flex: 0 0 12px; }
+  .seg-bar { position: relative; display: block; width: 100%; height: 12px; padding: 0; border: 0; border-radius: 3px; background: var(--track); overflow: hidden; transition: transform .12s ease; }
+  .seg-bar:hover { transform: scaleY(1.45); }
+  .seg-bar .fill { position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--p) * 100%); background: var(--watched); transition: width .6s cubic-bezier(.2, .7, .2, 1); transition-delay: calc(var(--i) * 22ms); }
+  .seg-bar.partial .fill { background: var(--saffron); }
+  .seg-bar.next { overflow: visible; box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--saffron); }
+  .tape.intro .seg-bar .fill { width: 0; transition: none; }
+  .tape-num { font: 700 13px/1 var(--tall-numeric); color: var(--ink-3); text-align: center; letter-spacing: .03em; }
+  .tape-num.next { color: var(--saffron-ink); }
+  .tape-track.dense .tape-num:not(.shown) { visibility: hidden; }
+
+  .episodes { margin-top: 44px; padding-bottom: 64px; }
+  .episodes > .label { margin-bottom: 10px; }
+  .season-head { margin: 26px 0 8px; font: 700 22px/1 var(--display); font-stretch: condensed; }
+  .eps { display: grid; gap: 4px; list-style: none; margin: 0; padding: 0; }
+  .ep { display: grid; grid-template-columns: 50px 176px minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: 12px 14px 12px 6px; border: 1px solid transparent; border-radius: var(--radius); }
+  .ep:hover { background: var(--surface); }
+  .ep.is-next { background: var(--surface); border-color: var(--rule); box-shadow: var(--shadow-sm); }
+  .ep-num { font: 700 34px/1 var(--tall-numeric); font-stretch: condensed; color: var(--ink-3); text-align: right; letter-spacing: .01em; }
+  .ep.is-next .ep-num { color: var(--saffron-ink); }
+  .ep-still { position: relative; display: block; width: 176px; aspect-ratio: 16 / 9; padding: 0; border: 0; border-radius: 8px; overflow: hidden; background: var(--track); }
+  .ep-still .ph { font-size: 30px; }
+  .ep-still .pos { height: 3px; }
+  .ep.watched .ep-still img { opacity: .72; }
+  .ep-title { font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .ep.watched .ep-title { color: var(--ink-2); }
+  .ep-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; font: 700 13px/1 var(--numeric); letter-spacing: .02em; color: var(--ink-3); }
+  .ep-sub svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
+  .ep-note { font: 600 12px/1 var(--body); color: var(--ink-3); }
+  .tag { padding: 4px 7px; border-radius: 5px; font: 600 11px/1 var(--body); letter-spacing: .08em; text-transform: uppercase; background: color-mix(in srgb, var(--saffron) 18%, transparent); color: var(--saffron-ink); }
+  .ep-actions { display: flex; align-items: center; gap: 14px; }
+  .round { width: 42px; height: 42px; flex: none; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 1px solid var(--rule); background: var(--surface); box-shadow: var(--shadow-sm); }
+  .round svg { width: 16px; height: 16px; margin-left: 2px; }
+  .round:hover { border-color: var(--indigo); color: var(--indigo); }
+  .ep.is-next .round { background: var(--indigo); border-color: var(--indigo); color: var(--on-indigo); }
+
+  .empty { max-width: 520px; margin: 12vh auto 0; text-align: center; }
+  .empty h1 { margin: 0 0 12px; font: 700 48px/1 var(--display); font-stretch: condensed; }
+  .empty p { margin: 0 0 24px; color: var(--ink-2); }
+  .empty .actions { justify-content: center; }
+
+  .page { max-width: 760px; padding-bottom: 80px; }
+  .page h1 { margin: 12px 0 8px; font: 700 44px/1 var(--display); font-stretch: condensed; }
+  .panel { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--rule); }
+  .panel h2 { margin: 0 0 6px; font: 700 24px/1 var(--display); font-stretch: condensed; }
+  .hint { margin: 0 0 14px; font-size: 13.5px; color: var(--ink-3); }
+  .sources { display: grid; gap: 8px; list-style: none; margin: 0 0 14px; padding: 0; }
+  .source { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 10px 10px 12px; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow-sm); }
+  .source-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 9px; background: var(--track); color: var(--ink-2); }
+  .source-icon svg { width: 18px; height: 18px; }
+  .source-body { min-width: 0; }
+  .source-name, .source-detail, .source-state { display: block; }
+  .source-name { font-weight: 600; }
+  .source-detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 12.5px/1.3 ui-monospace, "SF Mono", Consolas, monospace; color: var(--ink-3); }
+  .source-state { font-size: 12.5px; color: var(--ink-3); }
+  .source-state.bad { color: var(--danger); }
+  .row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .field { display: grid; gap: 6px; margin-bottom: 12px; }
+  .field span { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .field input, .inline input { height: 40px; padding: 0 12px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); }
+  .inline { display: flex; flex-wrap: wrap; gap: 8px; }
+  .inline input { flex: 1 1 220px; }
+  .check { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; align-items: start; cursor: pointer; }
+  .check input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--indigo); }
+  .check .hint { display: block; margin: 2px 0 0; }
+  .form-error { min-height: 1.2em; margin: 8px 0 0; font-size: 13px; color: var(--danger); }
+
+  dialog { width: min(560px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--rule); border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+  dialog::backdrop { background: rgba(8, 12, 22, .45); }
+  .sheet { padding: 24px; }
+  .sheet h2 { margin: 0 0 6px; font: 700 26px/1 var(--display); font-stretch: condensed; }
+  .sheet-end { display: flex; justify-content: space-between; gap: 8px; margin-top: 22px; }
+  .pick-list { display: grid; gap: 6px; max-height: 300px; overflow-y: auto; margin: 0 0 14px; padding: 0; list-style: none; }
+  .pick { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper); text-align: left; }
+  .pick:hover, .pick[aria-pressed="true"] { border-color: var(--indigo); }
+  .pick svg { width: 18px; height: 18px; flex: none; color: var(--ink-3); }
+  .pick strong { display: block; font-weight: 600; }
+  .pick span { font-size: 12.5px; color: var(--ink-3); }
+  .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 10px; font-size: 13.5px; color: var(--ink-3); }
+  .crumbs button { border: 0; background: none; padding: 2px 4px; border-radius: 5px; color: var(--indigo); font-weight: 600; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--rule); border-top-color: var(--indigo); border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast { position: fixed; z-index: 60; left: 50%; bottom: 28px; transform: translateX(-50%); max-width: calc(100vw - 32px); padding: 12px 18px; border-radius: 10px; background: var(--ink); color: var(--paper); font-weight: 600; box-shadow: var(--shadow); }
+
+  body.playing { overflow: hidden; }
+  .player { position: fixed; inset: 0; z-index: 50; background: #000; color: #fff; }
+  .player video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+  .player video::cue { background: transparent; color: #fff; font: 600 clamp(18px, 2.4vw, 34px)/1.3 var(--body); text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+  .player-top { position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: rgba(0, 0, 0, .62); transition: opacity .25s ease; }
+  .player.idle { cursor: none; }
+  .player.idle .player-top, .player.idle .p-float { opacity: 0; pointer-events: none; }
+  .p-btn { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .08); color: #fff; font-weight: 600; white-space: nowrap; }
+  .p-btn:hover { background: rgba(255, 255, 255, .18); }
+  .p-btn svg { width: 16px; height: 16px; flex: none; }
+  .p-btn.solid { background: #fff; border-color: #fff; color: #0C1120; }
+  .p-btn.solid:hover { background: #E8ECF4; }
+  .p-title { flex: 1; min-width: 0; line-height: 1.25; }
+  .p-title strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 21px/1.1 var(--display); font-stretch: condensed; }
+  .p-title span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; color: rgba(255, 255, 255, .78); }
+  .p-tools { display: flex; gap: 8px; }
+  .p-menu-wrap { position: relative; }
+  .p-menu { position: absolute; top: calc(100% + 8px); right: 0; min-width: 230px; max-height: min(60vh, 440px); overflow-y: auto; padding: 6px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(16, 22, 38, .97); box-shadow: 0 16px 48px rgba(0, 0, 0, .55); }
+  .p-menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; border: 0; border-radius: 8px; background: none; color: #fff; font-size: 14px; text-align: left; }
+  .p-menu button:hover, .p-menu button:focus-visible { background: rgba(255, 255, 255, .1); }
+  .p-menu .tick { display: inline-flex; width: 16px; color: #F4B42C; }
+  .p-menu .tick svg { width: 16px; height: 16px; }
+  .p-menu button[aria-checked="false"] .tick { visibility: hidden; }
+  .p-float { position: absolute; bottom: 84px; transition: opacity .25s ease; }
+  .p-skip { left: 24px; }
+  .p-next { right: 24px; }
+  .up-next { position: absolute; right: 24px; bottom: 84px; display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; width: min(450px, calc(100vw - 48px)); padding: 14px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .14); background: rgba(16, 22, 38, .95); box-shadow: 0 16px 48px rgba(0, 0, 0, .55); }
+  .up-next.solo { grid-template-columns: minmax(0, 1fr); }
+  .up-next-still { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: #1F2840; }
+  .up-next-still img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .up-next p { margin: 0; }
+  .up-next .label { color: rgba(255, 255, 255, .7); }
+  .up-next .up-next-title { margin: 6px 0 2px; font-weight: 600; line-height: 1.3; }
+  .up-next-count { font: 700 13px/1.2 var(--numeric); color: #F4B42C; letter-spacing: .02em; }
+  .up-next-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 0 16px; }
+    .bar { gap: 12px; }
+    .status { display: none; }
+    .hero { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .hero .still { order: -1; }
+    .ep { grid-template-columns: 30px 112px minmax(0, 1fr); gap: 12px; padding: 10px 10px 10px 4px; }
+    .ep-num { font-size: 22px; }
+    .ep-still { width: 112px; }
+    .ep-actions { grid-column: 2 / -1; justify-content: space-between; }
+    .poster { width: 132px; }
+    .wide { width: 240px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+    .source { grid-template-columns: 36px minmax(0, 1fr); }
+    .source > .btn { grid-column: 2; justify-self: start; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .seg-bar, .seg-bar .fill, .play-badge, .poster-art { transition: none; }
+  }
+</style>
+</head>
+<body>
+<header class="bar wrap">
+  <a class="mark" href="#/">Kinotape</a>
+  <label class="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search shows, movies, episodes and genres" aria-label="Search" autocomplete="off" spellcheck="false">
+  </label>
+  <div class="bar-end">
+    <span class="status" id="status"></span>
+    <a class="btn ghost" href="#/settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      Settings
+    </a>
+  </div>
+</header>
+
+<main class="wrap" id="app" aria-busy="true"></main>
+
+<dialog id="shareDialog" aria-labelledby="shareTitle">
+  <div class="sheet" id="shareSheet"></div>
+</dialog>
+
+<dialog id="cantPlay" aria-labelledby="cantPlayTitle">
+  <div class="sheet">
+    <h2 id="cantPlayTitle">This file can’t play here</h2>
+    <p class="hint" id="cantPlayText"></p>
+    <div class="sheet-end">
+      <button class="btn" type="button" data-action="close-cant-play">Close</button>
+      <button class="btn primary" type="button" id="cantPlayOpen" data-action="open-external">Open in your video player</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="player" id="player" hidden>
+  <video id="video" controls controlslist="nodownload nofullscreen noremoteplayback" playsinline preload="auto"></video>
+  <div class="player-top">
+    <button class="p-btn" type="button" data-player="close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </button>
+    <div class="p-title"><strong id="playerShow"></strong><span id="playerEpisode"></span></div>
+    <div class="p-tools">
+      <div class="p-menu-wrap">
+        <button class="p-btn" id="subsButton" type="button" data-player="subs" aria-haspopup="menu" aria-expanded="false" title="Subtitles (C)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 10.2a2.2 2.2 0 1 0 0 3.6M16.5 10.2a2.2 2.2 0 1 0 0 3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Subtitles
+        </button>
+        <div class="p-menu" id="subsMenu" role="menu" aria-label="Subtitles" hidden></div>
+      </div>
+      <button class="p-btn" type="button" data-player="fullscreen" aria-label="Full screen" title="Full screen (F)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <button class="p-btn p-float p-skip" id="skipIntro" type="button" data-player="skip" hidden>Skip 85s</button>
+  <button class="p-btn solid p-float p-next" id="nextPill" type="button" data-player="next" hidden>
+    Next episode
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l10-7zM16.5 5H19v14h-2.5z" fill="currentColor"/></svg>
+  </button>
+  <div class="up-next" id="upNext" role="status" hidden></div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+  const $ = (selector) => document.querySelector(selector);
+  const ICON = {
+    play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+    next: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14l10-7zM16.5 5H19v14h-2.5z" fill="currentColor"/></svg>',
+    back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    folder: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2 2h8.4A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    network: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="13" width="18" height="7" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7 7.5h.01M7 16.5h.01" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+    share: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h13A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z M8 7V5h8v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  const LANG2 = {
+    eng: 'en', jpn: 'ja', chi: 'zh', zho: 'zh', kor: 'ko', ind: 'id', may: 'ms', msa: 'ms', tha: 'th', vie: 'vi',
+    ara: 'ar', ger: 'de', deu: 'de', fre: 'fr', fra: 'fr', ita: 'it', por: 'pt', spa: 'es', hin: 'hi', pol: 'pl',
+    rus: 'ru', tur: 'tr', tam: 'ta', tel: 'te', dut: 'nl', nld: 'nl', swe: 'sv', nor: 'no', dan: 'da', fin: 'fi',
+    heb: 'he', gre: 'el', ell: 'el', cze: 'cs', ces: 'cs', hun: 'hu', rum: 'ro', ron: 'ro', ukr: 'uk', fil: 'fil',
+  };
+  const AUDIO_NAMES = { ac3: 'Dolby Digital', eac3: 'Dolby Digital Plus', dts: 'DTS', truehd: 'Dolby TrueHD', mlp: 'Dolby TrueHD' };
+  const SKIP_SECONDS = 85;
+  const view = { data: null, sig: '', introDone: false, toastTimer: 0, scanTimer: 0, query: '', group: 'genre', genre: '', cantPlayId: null };
+  const player = { show: null, ep: null, lastSaved: 0, idleTimer: 0, countdownTimer: 0, openedAt: 0, lastTrack: -1, trackChoice: -1 };
+  const subs = { lib: null, renderer: null, episodeId: null, broken: false };
+  const share = { step: 'server', servers: null, host: '', user: '', password: '', domain: '', guest: false, shares: [], share: '', dir: '', dirs: [], busy: false, error: '' };
+  try { view.group = localStorage.getItem('kinotape.group') || 'genre'; } catch (err) { view.group = 'genre'; }
+
+  /** Escape text for use inside HTML. */
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  /** Left-pad a number with zeros. */
+  function pad(n, width) {
+    return String(n).padStart(width, '0');
+  }
+
+  /** Format seconds as m:ss, or h:mm:ss for long videos. */
+  function clock(seconds) {
+    const s = Math.max(0, Math.round(seconds || 0));
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), rest = s % 60;
+    return h ? `${h}:${pad(m, 2)}:${pad(rest, 2)}` : `${m}:${pad(rest, 2)}`;
+  }
+
+  /** Digits needed for the show's highest episode number, at least two. */
+  function digits(show) {
+    return Math.max(2, String(Math.max(0, ...show.episodes.map((e) => e.episode || 0))).length);
+  }
+
+  /** Padded episode number such as 07, or an empty string for movies. */
+  function number(show, ep) {
+    return ep.episode == null ? '' : pad(ep.episode, digits(show));
+  }
+
+  /** Episode code such as E07, or an empty string for movies. */
+  function code(show, ep) {
+    return ep.episode == null ? '' : `E${number(show, ep)}`;
+  }
+
+  /** Season and episode code such as S1 E07. */
+  function fullCode(show, ep) {
+    return ep.season ? `S${ep.season} ${code(show, ep)}` : code(show, ep);
+  }
+
+  /** Readable episode name, falling back to its number or file name. */
+  function epName(ep) {
+    return ep.title || (ep.episode != null ? `Episode ${ep.episode}` : ep.file);
+  }
+
+  /** Fraction of an episode already seen. */
+  function seen(ep) {
+    if (ep.watched) return 1;
+    return ep.duration ? Math.min(1, ep.position / ep.duration) : 0;
+  }
+
+  /** Whole minutes left in an episode, never below one. */
+  function minutesLeft(ep) {
+    return Math.max(1, Math.round(((ep.duration || 0) - ep.position) / 60));
+  }
+
+  /** Whether an episode will pick up part-way through. */
+  function isResumable(ep) {
+    return ep.resume_at > 0 && !!ep.duration;
+  }
+
+  /** Still-image URL for an episode; the size in the query changes when the file does. */
+  function still(ep) {
+    return `/thumb/${ep.id}?s=${ep.size}`;
+  }
+
+  /** The episode a show offers next, and the one after it. */
+  function nextOf(show) {
+    return {
+      ep: show.episodes.find((e) => e.id === show.next_id),
+      after: show.after_id ? show.episodes.find((e) => e.id === show.after_id) : null,
+    };
+  }
+
+  /** Look an episode up in the current data. */
+  function findEpisode(id) {
+    for (const show of view.data.shows) {
+      const ep = show.episodes.find((e) => e.id === id);
+      if (ep) return { show, ep };
+    }
+    return null;
+  }
+
+  /** Look a show up in the current data. */
+  function findShow(id) {
+    return view.data ? view.data.shows.find((s) => s.id === id) : null;
+  }
+
+  /** Whether a show has been started and not finished. */
+  function inProgress(show) {
+    return !!show.last_played && show.mode !== 'rewatch';
+  }
+
+  /** Call Kinotape's API; POSTs carry a header that other sites cannot send. */
+  async function api(path, body) {
+    const options = body === undefined ? {} : {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Kinotape': '1' },
+      body: JSON.stringify(body),
+    };
+    const response = await fetch(path, options);
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(json.error || `Kinotape answered with an error (${response.status}).`);
+    return json;
+  }
+
+  /** Reload the library, redrawing only when something changed. Waits while the player is open. */
+  async function refresh(force) {
+    if (!force && !$('#player').hidden) return;
+    try {
+      const data = await api('/api/library');
+      const scanning = data.sources.some((s) => s.scanning);
+      $('#status').textContent = scanning ? 'Scanning…' : 'Updated ' + new Date(data.updated * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      clearTimeout(view.scanTimer);
+      if (scanning) view.scanTimer = setTimeout(() => refresh(false), 1500);
+      if (!force && data.sig === view.sig) return;
+      view.data = data;
+      view.sig = data.sig;
+      render();
+    } catch (err) {
+      $('#status').textContent = 'Kinotape is not running. Open it again.';
+    }
+  }
+
+  /** The page the address bar points at. */
+  function route() {
+    const parts = location.hash.replace(/^#\/?/, '').split('/');
+    if (parts[0] === 'show' && parts[1]) return { name: 'show', id: decodeURIComponent(parts[1]) };
+    if (parts[0] === 'settings') return { name: 'settings' };
+    return { name: 'home' };
+  }
+
+  /** Draw the current page. */
+  function render() {
+    if (!view.data) return;
+    const app = $('#app');
+    app.setAttribute('aria-busy', 'false');
+    const r = route();
+    if (r.name === 'settings') {
+      app.innerHTML = settingsPage();
+      return;
+    }
+    if (r.name === 'show') {
+      const show = findShow(r.id);
+      if (show) {
+        app.innerHTML = showPage(show);
+        animateTape(app);
+        return;
+      }
+    }
+    app.innerHTML = homePage();
+  }
+
+  /** Play the season tape's fill animation once per show page. */
+  function animateTape(app) {
+    const tapeEl = app.querySelector('.tape');
+    if (tapeEl && !view.introDone && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      tapeEl.classList.add('intro');
+      requestAnimationFrame(() => requestAnimationFrame(() => tapeEl.classList.remove('intro')));
+    }
+    view.introDone = true;
+  }
+
+  /** Warnings about missing tools or sources that could not be read. */
+  function notices() {
+    const data = view.data;
+    let html = '';
+    if (!data.ffmpeg) {
+      const how = data.platform === 'windows'
+        ? 'Run <code>winget install ffmpeg</code>, or put <code>ffmpeg.exe</code> and <code>ffprobe.exe</code> next to Kinotape.'
+        : data.platform === 'darwin' ? 'Run <code>brew install ffmpeg</code>.' : 'Install the <code>ffmpeg</code> package.';
+      html += `<p class="notice"><strong>Install ffmpeg for thumbnails, lengths and subtitles.</strong> ${how} Then open Kinotape again.</p>`;
+    }
+    for (const src of data.sources.filter((s) => s.error)) {
+      html += `<p class="notice"><strong>Kinotape can’t read ${esc(src.name)}.</strong> ${esc(src.error)} <a class="link" href="#/settings">Check settings</a></p>`;
+    }
+    return html;
+  }
+
+  /** The home page: what to continue, then the library in rows. */
+  function homePage() {
+    const data = view.data;
+    if (!data.shows.length && data.sources.some((s) => s.scanning)) return notices() + scanningState();
+    if (!data.shows.length) return notices() + emptyState();
+    if (view.query.trim()) return notices() + searchResults(view.query.trim());
+    const going = data.shows.filter(inProgress);
+    const featured = going[0] || data.shows[0];
+    let html = notices() + homeHero(featured);
+    if (going.length) {
+      html += `<section class="row" aria-label="Continue watching"><div class="row-head"><h2 class="row-title">Continue watching</h2></div>
+        <div class="scroller">${going.map(continueCard).join('')}</div></section>`;
+    }
+    return html + toolbar() + groupedRows(data.shows);
+  }
+
+  /** Big banner for the show to carry on with. */
+  function homeHero(show) {
+    const { ep } = nextOf(show);
+    const verb = { resume: 'Resume', start: 'Play', rewatch: 'Watch again' }[show.mode];
+    const label = show.kind === 'movie' ? verb : `${verb} ${code(show, ep)}`;
+    const eyebrow = inProgress(show) ? 'Continue watching' : 'In your library';
+    const meta = isResumable(ep) ? `${fullCode(show, ep)} · ${minutesLeft(ep)}m left` : (show.kind === 'movie' ? (show.year || '') : fullCode(show, ep));
+    return `<section class="hero" aria-labelledby="heroTitle">
+      <div>
+        <p class="eyebrow">${eyebrow}</p>
+        <h1 class="show-title" id="heroTitle">${esc(show.title)}</h1>
+        ${genreFacts(show)}
+        ${show.overview ? `<p class="overview">${esc(show.overview)}</p>` : ''}
+        ${meta ? `<p class="meta">${esc(meta)}</p>` : ''}
+        <div class="actions">
+          <button class="btn primary big" type="button" data-play="${ep.id}">${ICON.play} ${esc(label)}</button>
+          <a class="btn big" href="#/show/${encodeURIComponent(show.id)}">${show.kind === 'movie' ? 'Details' : 'Episodes'}</a>
+        </div>
+      </div>
+      <button class="still" type="button" data-play="${ep.id}" tabindex="-1" aria-hidden="true">
+        <span class="ph">${esc(number(show, ep))}</span>
+        <img src="${still(ep)}" alt="" onerror="this.remove()">
+        <span class="play-badge">${ICON.play}</span>
+        ${seen(ep) > 0 ? `<span class="pos" style="--p:${seen(ep).toFixed(4)}"><i></i></span>` : ''}
+      </button>
+    </section>`;
+  }
+
+  /** Year, episode count and genre chips for a show. */
+  function genreFacts(show) {
+    const facts = [];
+    if (show.year) facts.push(`<span class="fact">${show.year}</span>`);
+    if (show.kind === 'series') facts.push(`<span class="fact">${show.episodes.length} episode${show.episodes.length === 1 ? '' : 's'}</span>`);
+    const chips = show.genres.slice(0, 5).map((g) => `<button class="chip" type="button" data-genre="${esc(g)}">${esc(g)}</button>`);
+    return facts.length || chips.length ? `<div class="facts">${facts.join('')}${chips.join('')}</div>` : '';
+  }
+
+  /** A wide card for the Continue watching row. */
+  function continueCard(show) {
+    const { ep } = nextOf(show);
+    const p = seen(ep);
+    const meta = show.kind === 'movie' ? (isResumable(ep) ? `${minutesLeft(ep)}m left` : '') : `${fullCode(show, ep)}${isResumable(ep) ? ` · ${minutesLeft(ep)}m left` : ''}`;
+    return `<button class="wide" type="button" data-play="${ep.id}" aria-label="${esc(`Play ${show.title} ${meta}`)}">
+      <span class="wide-still"><span class="ph">${esc(number(show, ep))}</span><img src="${still(ep)}" alt="" loading="lazy" onerror="this.remove()">
+      ${p > 0 ? `<span class="pos" style="--p:${p.toFixed(4)}"><i></i></span>` : ''}</span>
+      <span class="poster-title">${esc(show.title)}</span>
+      <span class="poster-meta">${esc(meta)}</span>
+    </button>`;
+  }
+
+  /** The group-by switch and, when grouping by genre, a chip per genre. */
+  function toolbar() {
+    const groups = [['genre', 'Genre'], ['type', 'Type'], ['source', 'Folder'], ['az', 'A to Z']];
+    const seg = groups.map(([key, label]) => `<button type="button" data-group="${key}" aria-pressed="${view.group === key}">${label}</button>`).join('');
+    const chips = view.group === 'genre' && view.data.genres.length
+      ? `<button class="chip" type="button" data-genre="" aria-pressed="${!view.genre}">All</button>` +
+        view.data.genres.map((g) => `<button class="chip" type="button" data-genre="${esc(g)}" aria-pressed="${view.genre === g}">${esc(g)}</button>`).join('')
+      : '';
+    return `<div class="toolbar"><span class="label">Group by</span><div class="seg" role="group" aria-label="Group by">${seg}</div>${chips}</div>`;
+  }
+
+  /** The library split into rows by the chosen grouping. */
+  function groupedRows(shows) {
+    const rows = new Map();
+    const put = (key, show) => { if (!rows.has(key)) rows.set(key, []); rows.get(key).push(show); };
+    const byTitle = [...shows].sort((a, b) => a.title.localeCompare(b.title));
+    if (view.group === 'genre' && !view.genre && shows.length < 6) {
+      return `<section class="row"><div class="row-head"><h2 class="row-title">Your library</h2><span class="row-count">${shows.length}</span></div>
+        <div class="grid">${byTitle.map(posterCard).join('')}</div></section>`;
+    }
+    if (view.group === 'az') return `<section class="row"><div class="grid">${byTitle.map(posterCard).join('')}</div></section>`;
+    for (const show of byTitle) {
+      if (view.group === 'type') put(show.genres.includes('Anime') ? 'Anime' : show.kind === 'movie' ? 'Movies' : 'TV series', show);
+      else if (view.group === 'source') show.sources.forEach((s) => put(s, show));
+      else if (view.genre) { if (show.genres.includes(view.genre)) put(view.genre, show); }
+      else if (show.genres.length) show.genres.forEach((g) => put(g, show));
+      else put('No genre yet', show);
+    }
+    const keys = [...rows.keys()].sort((a, b) => (a === 'No genre yet') - (b === 'No genre yet') || rows.get(b).length - rows.get(a).length || a.localeCompare(b));
+    if (view.genre && keys.length === 1) {
+      return `<section class="row"><div class="row-head"><h2 class="row-title">${esc(keys[0])}</h2><span class="row-count">${rows.get(keys[0]).length}</span></div>
+        <div class="grid">${rows.get(keys[0]).map(posterCard).join('')}</div></section>`;
+    }
+    return keys.map((key) => `<section class="row"><div class="row-head"><h2 class="row-title">${esc(key)}</h2><span class="row-count">${rows.get(key).length}</span></div>
+      <div class="scroller">${rows.get(key).map(posterCard).join('')}</div></section>`).join('');
+  }
+
+  /** A poster card linking to a show. */
+  function posterCard(show) {
+    const { ep } = nextOf(show);
+    let meta = show.kind === 'movie' ? (show.year ? String(show.year) : 'Movie') : `${show.episodes.length} episode${show.episodes.length === 1 ? '' : 's'}`;
+    if (inProgress(show) && show.kind === 'series') meta = `Next: ${code(show, ep)}`;
+    if (show.mode === 'rewatch') meta = 'Watched';
+    const progress = show.kind === 'series' ? show.watched_count / show.episodes.length : seen(ep);
+    const art = show.art
+      ? `<img src="${esc(show.art)}" alt="" loading="lazy" onerror="this.remove()">`
+      : '';
+    return `<a class="poster" href="#/show/${encodeURIComponent(show.id)}">
+      <span class="poster-art"><span class="poster-fallback"><strong>${esc(show.title)}</strong><span>${esc(show.year || '')}</span></span>${art}</span>
+      <span class="poster-title" title="${esc(show.title)}">${esc(show.title)}</span>
+      <span class="poster-meta">${esc(meta)}</span>
+      ${progress > 0 ? `<span class="mini" style="--p:${progress.toFixed(3)}"><i></i></span>` : ''}
+    </a>`;
+  }
+
+  /** Shows and episodes matching a search. */
+  function searchResults(query) {
+    const q = query.toLowerCase();
+    const shows = view.data.shows.filter((s) => s.title.toLowerCase().includes(q) || s.genres.some((g) => g.toLowerCase().includes(q)));
+    const episodes = [];
+    for (const show of view.data.shows) {
+      for (const ep of show.episodes) {
+        if (ep.title && ep.title.toLowerCase().includes(q)) episodes.push({ show, ep });
+      }
+    }
+    if (!shows.length && !episodes.length) {
+      return `<section class="empty"><h1>Nothing found</h1><p>No show, episode or genre matches “${esc(query)}”.</p></section>`;
+    }
+    let html = '';
+    if (shows.length) {
+      html += `<section class="row"><div class="row-head"><h2 class="row-title">Shows and movies</h2><span class="row-count">${shows.length}</span></div>
+        <div class="grid">${shows.map(posterCard).join('')}</div></section>`;
+    }
+    if (episodes.length) {
+      html += `<section class="row"><div class="row-head"><h2 class="row-title">Episodes</h2><span class="row-count">${episodes.length}</span></div>
+        <ul class="results-episodes">${episodes.slice(0, 60).map(({ show, ep }) => `<li><button class="result-ep" type="button" data-play="${ep.id}">
+          <span class="wide-still"><img src="${still(ep)}" alt="" loading="lazy" onerror="this.remove()"></span>
+          <span><strong>${esc(epName(ep))}</strong><span>${esc(show.title)} · ${esc(fullCode(show, ep))}</span></span>
+        </button></li>`).join('')}</ul></section>`;
+    }
+    return html;
+  }
+
+  /** Shown while the first scan of the folders is still running. */
+  function scanningState() {
+    return `<section class="empty">
+      <h1><span class="spinner"></span> Looking for videos</h1>
+      <p>Kinotape is scanning your folders and shares. If your computer asks whether Kinotape may open a folder, choose Allow.</p>
+    </section>`;
+  }
+
+  /** Invite the viewer to add a folder or a network share when the library is empty. */
+  function emptyState() {
+    return `<section class="empty">
+      <h1>Add your videos</h1>
+      <p>Kinotape shows the videos in folders on this computer and on network shares, remembers where you stopped, and plays the next episode for you.</p>
+      <div class="actions">
+        <button class="btn primary big" type="button" data-action="pick-folder">${ICON.folder} Add a folder</button>
+        <button class="btn big" type="button" data-action="add-share">${ICON.network} Add a network share</button>
+      </div>
+    </section>`;
+  }
+
+  /** A show's own page: the next episode, the season tape and every episode. */
+  function showPage(show) {
+    const { ep, after } = nextOf(show);
+    const isMovie = show.kind === 'movie';
+    const c = code(show, ep);
+    const eyebrow = { resume: 'Continue watching', start: show.watched_count ? 'Up next' : 'Start watching', rewatch: 'You finished this' }[show.mode];
+    const label = {
+      resume: isMovie ? 'Resume' : `Resume ${c}`,
+      start: isMovie ? 'Play' : `Play ${c}`,
+      rewatch: isMovie ? 'Watch again' : `Watch again from ${c}`,
+    }[show.mode];
+    const meta = isResumable(ep) ? `${clock(ep.resume_at)} of ${clock(ep.duration)} · ${minutesLeft(ep)}m left` : (ep.duration ? clock(ep.duration) : '');
+    const line = isMovie ? '' : `<span class="ep-code">${esc(fullCode(show, ep))}</span>${esc(epName(ep))}`;
+    const skip = after && !isMovie && show.mode !== 'rewatch'
+      ? `<button class="btn big" type="button" data-play="${after.id}">${ICON.next} Skip to ${esc(code(show, after))}</button>`
+      : '';
+    return `<a class="back link" href="#/">${ICON.back} Library</a>
+    <section class="hero" aria-labelledby="showTitle">
+      <div>
+        <p class="eyebrow">${eyebrow}</p>
+        <h1 class="show-title" id="showTitle">${esc(show.title)}</h1>
+        ${genreFacts(show)}
+        ${show.overview ? `<p class="overview">${esc(show.overview)}</p>` : ''}
+        ${line ? `<p class="ep-line">${line}</p>` : ''}
+        ${meta ? `<p class="meta">${esc(meta)}</p>` : ''}
+        <div class="actions">
+          <button class="btn primary big" type="button" data-play="${ep.id}">${ICON.play} ${esc(label)}</button>
+          ${skip}
+        </div>
+      </div>
+      <button class="still" type="button" data-play="${ep.id}" tabindex="-1" aria-hidden="true">
+        <span class="ph">${esc(number(show, ep))}</span>
+        <img src="${still(ep)}" alt="" onerror="this.remove()">
+        <span class="play-badge">${ICON.play}</span>
+        ${seen(ep) > 0 ? `<span class="pos" style="--p:${seen(ep).toFixed(4)}"><i></i></span>` : ''}
+      </button>
+    </section>` + tape(show) + episodeList(show);
+  }
+
+  /** Heading for the season tape. */
+  function seasonLabel(show) {
+    const seasons = [...new Set(show.episodes.map((e) => e.season).filter((s) => s != null))];
+    if (!seasons.length) return 'Episodes';
+    return seasons.length === 1 ? `Season ${seasons[0]}` : `Seasons ${seasons[0]} to ${seasons[seasons.length - 1]}`;
+  }
+
+  /** The season tape: one segment per episode, filled as far as you have watched. */
+  function tape(show) {
+    if (show.kind === 'movie' || show.episodes.length < 2) return '';
+    const dense = show.episodes.length > 30;
+    const items = [];
+    let season = show.episodes[0].season;
+    show.episodes.forEach((ep, i) => {
+      if (ep.season !== season) items.push('<li class="season-gap"></li>');
+      season = ep.season;
+      const p = seen(ep);
+      const isNext = ep.id === show.next_id;
+      const classes = ['seg-bar', p > 0 && p < 1 ? 'partial' : '', isNext ? 'next' : ''].filter(Boolean).join(' ');
+      const tip = `${fullCode(show, ep)} · ${epName(ep)}${ep.watched ? ' · Watched' : ''}`;
+      const shown = !dense || isNext || (ep.episode || 0) % 5 === 0;
+      items.push(`<li>
+        <button class="${classes}" type="button" tabindex="-1" data-play="${ep.id}" title="${esc(tip)}" style="--p:${p.toFixed(4)};--i:${i}"><span class="fill"></span></button>
+        <span class="tape-num${isNext ? ' next' : ''}${shown ? ' shown' : ''}">${esc(number(show, ep))}</span>
+      </li>`);
+    });
+    return `<section class="tape" aria-hidden="true">
+      <div class="tape-head"><h2 class="label">${esc(seasonLabel(show))}</h2><span class="tape-count">${show.watched_count} of ${show.episodes.length} watched</span></div>
+      <ol class="tape-track${dense ? ' dense' : ''}">${items.join('')}</ol>
+    </section>`;
+  }
+
+  /** Why a file can't play in the browser, in words. */
+  function cantPlayReason(ep) {
+    if (ep.audio_codec && !['aac', 'mp3', 'opus', 'vorbis', 'flac'].includes(ep.audio_codec) && !ep.audio_codec.startsWith('pcm')) {
+      return `Its sound is ${AUDIO_NAMES[ep.audio_codec] || ep.audio_codec.toUpperCase()}, which browsers can’t decode.`;
+    }
+    return 'Its video format isn’t one browsers can decode.';
+  }
+
+  /** One episode: number, still, title, progress, and its actions. */
+  function episodeRow(show, ep) {
+    const isNext = ep.id === show.next_id;
+    const p = seen(ep);
+    const name = epName(ep);
+    let status = ep.duration ? clock(ep.duration) : '';
+    if (ep.watched) status = `${ICON.check}Watched`;
+    else if (isResumable(ep)) status = `${clock(ep.resume_at)} of ${clock(ep.duration)}`;
+    const tag = isNext ? `<span class="tag">${show.mode === 'resume' ? 'Continue' : 'Up next'}</span>` : '';
+    const note = ep.in_app ? '' : '<span class="ep-note">Opens in your video player</span>';
+    const verb = isNext && show.mode === 'resume' ? 'Resume' : 'Play';
+    return `<li class="ep${isNext ? ' is-next' : ''}${ep.watched ? ' watched' : ''}">
+      <span class="ep-num" aria-hidden="true">${esc(number(show, ep))}</span>
+      <button class="ep-still" type="button" data-play="${ep.id}" tabindex="-1" aria-hidden="true">
+        <span class="ph">${esc(number(show, ep))}</span>
+        <img src="${still(ep)}" alt="" loading="lazy" onerror="this.remove()">
+        ${p > 0 ? `<span class="pos" style="--p:${p.toFixed(4)}"><i></i></span>` : ''}
+      </button>
+      <div>
+        <div class="ep-title">${esc(name)}</div>
+        <div class="ep-sub">${tag}<span>${status}</span>${note}</div>
+      </div>
+      <div class="ep-actions">
+        <button class="link" type="button" data-mark="${ep.id}">${ep.watched ? 'Mark unwatched' : 'Mark watched'}</button>
+        <button class="round" type="button" data-play="${ep.id}" aria-label="${esc(`${verb} ${code(show, ep)} ${name}`.replace(/\s+/g, ' ').trim())}">${ICON.play}</button>
+      </div>
+    </li>`;
+  }
+
+  /** Every episode in order, grouped by season when there is more than one. */
+  function episodeList(show) {
+    const groups = new Map();
+    for (const ep of show.episodes) {
+      const key = ep.season ?? 0;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(ep);
+    }
+    let html = '';
+    for (const [season, episodes] of groups) {
+      if (groups.size > 1) html += `<h3 class="season-head">${season ? `Season ${season}` : 'Other'}</h3>`;
+      html += `<ol class="eps">${episodes.map((ep) => episodeRow(show, ep)).join('')}</ol>`;
+    }
+    return `<section class="episodes" aria-labelledby="episodesTitle"><h2 class="label" id="episodesTitle">${show.kind === 'movie' ? 'Files' : 'Episodes'}</h2>${html}</section>`;
+  }
+
+  /** The settings page: sources, playback, artwork and quitting. */
+  function settingsPage() {
+    const data = view.data;
+    const sources = data.sources.length
+      ? data.sources.map((src) => `<li class="source">
+          <span class="source-icon">${src.kind === 'smb' ? ICON.network : ICON.folder}</span>
+          <span class="source-body"><span class="source-name">${esc(src.name)}</span><span class="source-detail" title="${esc(src.detail)}">${esc(src.detail)}</span>
+            <span class="source-state${src.error ? ' bad' : ''}">${src.error ? esc(src.error) : src.scanning ? '<span class="spinner"></span> Scanning…' : `${src.count} video${src.count === 1 ? '' : 's'}`}</span></span>
+          <button class="btn ghost danger" type="button" data-remove="${esc(src.id)}">Remove</button>
+        </li>`).join('')
+      : '<li class="hint">No folders or shares yet.</li>';
+    const ffmpeg = data.ffmpeg ? 'ffmpeg is installed, so thumbnails, lengths and subtitles work.' : 'ffmpeg is missing, so there are no thumbnails, lengths or subtitles yet.';
+    return `<div class="page">
+      <a class="back link" href="#/">${ICON.back} Library</a>
+      <h1>Settings</h1>
+      <section class="panel">
+        <h2>Folders and shares</h2>
+        <p class="hint">Kinotape looks for videos in these places and everything inside them.</p>
+        <ul class="sources">${sources}</ul>
+        <div class="row-actions">
+          <button class="btn" type="button" data-action="pick-folder">${ICON.folder} Add a folder</button>
+          <button class="btn" type="button" data-action="add-share">${ICON.network} Add a network share</button>
+          <button class="btn ghost" type="button" data-action="rescan">Scan again</button>
+        </div>
+        <div class="inline" style="margin-top:12px">
+          <input id="folderPath" type="text" placeholder="or paste a folder path" aria-label="Folder path" spellcheck="false">
+          <button class="btn" type="button" data-action="add-path">Add</button>
+        </div>
+        <p class="form-error" id="folderError" role="alert"></p>
+      </section>
+      <section class="panel">
+        <h2>Playback</h2>
+        <label class="check">
+          <input type="checkbox" id="autoplayToggle" ${data.autoplay ? 'checked' : ''}>
+          <span><strong>Keep playing the next episode</strong><span class="hint">When an episode ends, the next one starts after a short countdown.</span></span>
+        </label>
+      </section>
+      <section class="panel">
+        <h2>Posters and genres</h2>
+        <label class="check">
+          <input type="checkbox" id="artworkToggle" ${data.artwork ? 'checked' : ''}>
+          <span><strong>Look up posters, genres and descriptions</strong><span class="hint">Show and film titles are sent to AniList, TVmaze and Wikipedia. Nothing else leaves this computer.</span></span>
+        </label>
+        <div class="field" style="margin-top:16px">
+          <span>TMDB key, for films and shows the others don’t know (optional)</span>
+          <div class="inline"><input id="tmdbKey" type="password" placeholder="${data.tmdb ? 'Saved. Paste a new key to replace it' : 'API key or read access token'}" autocomplete="off" spellcheck="false">
+          <button class="btn" type="button" data-action="save-tmdb">Save key</button></div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>This computer</h2>
+        <p class="hint">${ffmpeg}</p>
+        <p class="hint">Kinotape keeps running in the background so it opens instantly. Quitting stops it until you open Kinotape again.</p>
+        <button class="btn danger" type="button" data-action="quit">Quit Kinotape</button>
+      </section>
+    </div>`;
+  }
+
+  /** Show a short confirmation at the bottom of the window. */
+  function toast(text) {
+    const el = $('#toast');
+    el.textContent = text;
+    el.hidden = false;
+    clearTimeout(view.toastTimer);
+    view.toastTimer = setTimeout(() => { el.hidden = true; }, 3800);
+  }
+
+  /** Play an episode in this window, or explain why it has to open in another player. */
+  function startEpisode(id) {
+    const found = findEpisode(id);
+    if (!found) return;
+    if (!found.ep.in_app) {
+      view.cantPlayId = id;
+      $('#cantPlayText').textContent = `${cantPlayReason(found.ep)} Your usual video player can play it.`;
+      $('#cantPlay').showModal();
+      return;
+    }
+    openPlayer(found.show, found.ep, true);
+  }
+
+  /** Open the file of the dialog's episode in the system's video player. */
+  async function openExternally() {
+    $('#cantPlay').close();
+    try {
+      await api('/api/open-external', { id: view.cantPlayId });
+      toast('Opened in your video player');
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  /** Language name for a subtitle stream, with its title when it has one. */
+  function subtitleLabel(sub) {
+    const tag = LANG2[sub.lang] || sub.lang || '';
+    let name = tag ? tag.toUpperCase() : 'Unknown';
+    try {
+      name = new Intl.DisplayNames(['en'], { type: 'language' }).of(tag) || name;
+    } catch (err) {
+      name = tag ? tag.toUpperCase() : 'Unknown';
+    }
+    return sub.title ? `${name} (${sub.title})` : name;
+  }
+
+  /** The subtitle stream to show: the one picked last time, else English dialogue for non-English audio. */
+  function pickSubtitle(ep) {
+    const list = ep.subtitles;
+    if (!list.length) return null;
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem('kinotape.subtitles') || 'null'); } catch (err) { saved = null; }
+    if (saved && saved.off) return null;
+    if (saved) {
+      const match = list.find((s) => s.lang === saved.lang && (s.title || '') === (saved.title || ''))
+        || list.find((s) => s.lang === saved.lang && !s.forced);
+      if (match) return match;
+    }
+    const english = list.filter((s) => s.lang === 'eng');
+    const isForced = (s) => s.forced || /forced/i.test(s.title || '');
+    if (ep.audio_lang === 'eng') return english.find(isForced) || null;
+    return english.find((s) => !isForced(s) && !/sdh|\bcc\b/i.test(s.title || ''))
+      || english.find((s) => !isForced(s)) || list.find((s) => s.default) || list[0];
+  }
+
+  /** Load the libass subtitle renderer on first use. */
+  function assLibrary() {
+    subs.lib = subs.lib || import('/vendor/jassub/jassub.js').then((module) => module.default);
+    return subs.lib;
+  }
+
+  /** Stop and remove the libass renderer, if one is running. */
+  function destroyRenderer() {
+    const renderer = subs.renderer;
+    subs.renderer = null;
+    subs.episodeId = null;
+    if (renderer) renderer.destroy().catch(() => null);
+  }
+
+  /** Show one subtitle stream of the playing episode with its full ASS styling, or none for -1. */
+  async function showSubtitle(index) {
+    const ep = player.ep;
+    player.trackChoice = index;
+    if (index >= 0) player.lastTrack = index;
+    renderSubtitleMenu();
+    $('#video').querySelectorAll('track').forEach((t) => t.remove());
+    const sub = ep ? ep.subtitles[index] : null;
+    if (!sub) {
+      destroyRenderer();
+      return;
+    }
+    const url = `/subs/${ep.id}/${sub.index}.ass`;
+    if (!subs.broken) {
+      try {
+        if (subs.renderer && subs.episodeId === ep.id) {
+          await subs.renderer.ready;
+          await subs.renderer.renderer.setTrackByUrl(url);
+          return;
+        }
+        destroyRenderer();
+        const JASSUB = await assLibrary();
+        if (player.ep !== ep || player.trackChoice !== index) return;
+        subs.renderer = new JASSUB({
+          video: $('#video'),
+          subUrl: url,
+          fonts: ep.fonts.map((name) => `/fonts/${ep.id}/${encodeURIComponent(name)}`),
+          queryFonts: false,
+        });
+        subs.episodeId = ep.id;
+        await subs.renderer.ready;
+        return;
+      } catch (err) {
+        subs.broken = true;
+        destroyRenderer();
+      }
+    }
+    nativeSubtitle(ep, sub);
+  }
+
+  /** Plain browser subtitles for one stream, used only when the libass renderer can't start. */
+  function nativeSubtitle(ep, sub) {
+    const track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.label = subtitleLabel(sub);
+    track.srclang = LANG2[sub.lang] || 'und';
+    track.src = `/subs/${ep.id}/${sub.index}.vtt`;
+    $('#video').appendChild(track);
+    track.track.mode = 'showing';
+  }
+
+  /** Fill the subtitle menu with Off and every stream, ticking the one showing. */
+  function renderSubtitleMenu() {
+    const ep = player.ep;
+    $('#subsButton').hidden = !ep || !ep.subtitles.length;
+    if (!ep) return;
+    const items = [{ index: -1, label: 'Off' }].concat(ep.subtitles.map((sub, index) => ({ index, label: subtitleLabel(sub) })));
+    $('#subsMenu').innerHTML = items.map((item) => `<button type="button" role="menuitemradio" aria-checked="${item.index === player.trackChoice}" data-sub="${item.index}"><span class="tick">${ICON.check}</span>${esc(item.label)}</button>`).join('');
+  }
+
+  /** Open or close the subtitle menu; with no argument it flips. */
+  function toggleSubtitleMenu(open) {
+    const menu = $('#subsMenu');
+    const show = open === undefined ? menu.hidden : open;
+    menu.hidden = !show;
+    $('#subsButton').setAttribute('aria-expanded', String(show));
+    if (show) wake();
+  }
+
+  /** Save which subtitle language to prefer next time, or that subtitles are off. */
+  function rememberSubtitle(index) {
+    const sub = player.ep ? player.ep.subtitles[index] : null;
+    try {
+      localStorage.setItem('kinotape.subtitles', JSON.stringify(sub ? { lang: sub.lang, title: sub.title || '' } : { off: true }));
+    } catch (err) {
+      return;
+    }
+  }
+
+  /** Switch to a subtitle stream picked from the menu. */
+  function chooseSubtitle(index) {
+    toggleSubtitleMenu(false);
+    rememberSubtitle(index);
+    showSubtitle(index);
+  }
+
+  /** Turn subtitles off, or back on with the last stream used. */
+  function toggleSubtitles() {
+    const ep = player.ep;
+    if (!ep || !ep.subtitles.length) return;
+    const english = ep.subtitles.findIndex((sub) => sub.lang === 'eng');
+    const index = player.trackChoice >= 0 ? -1 : (player.lastTrack >= 0 ? player.lastTrack : Math.max(0, english));
+    rememberSubtitle(index);
+    showSubtitle(index);
+    toast(index < 0 ? 'Subtitles off' : `Subtitles: ${subtitleLabel(ep.subtitles[index])}`);
+  }
+
+  /** Send the playing position to Kinotape, at most every five seconds unless forced. */
+  function saveProgress(force) {
+    const video = $('#video');
+    if (!player.ep || !(video.currentTime > 0)) return null;
+    const stamp = Date.now();
+    if (!force && stamp - player.lastSaved < 5000) return null;
+    player.lastSaved = stamp;
+    return fetch('/api/progress', {
+      method: 'POST',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json', 'X-Kinotape': '1' },
+      body: JSON.stringify({ id: player.ep.id, position: video.currentTime }),
+    }).catch(() => null);
+  }
+
+  /** The episode `step` places away from the one playing, or null. */
+  function neighbour(step) {
+    if (!player.show || !player.ep) return null;
+    const episodes = player.show.episodes;
+    const index = episodes.findIndex((e) => e.id === player.ep.id);
+    return index < 0 ? null : episodes[index + step] || null;
+  }
+
+  /** Play an episode in this window, resuming where it was left. */
+  function openPlayer(show, ep, pushHistory) {
+    const video = $('#video');
+    clearUpNext();
+    player.show = show;
+    player.ep = ep;
+    player.openedAt = Date.now();
+    player.lastSaved = 0;
+    const choice = pickSubtitle(ep);
+    player.trackChoice = choice ? ep.subtitles.indexOf(choice) : -1;
+    player.lastTrack = player.trackChoice;
+    toggleSubtitleMenu(false);
+    const start = isResumable(ep) ? Math.max(0, ep.resume_at - 3) : 0;
+    video.src = `/video/${ep.id}` + (start ? `#t=${start.toFixed(1)}` : '');
+    showSubtitle(player.trackChoice);
+    $('#playerShow').textContent = show.title;
+    $('#playerEpisode').textContent = show.kind === 'movie' ? (show.year ? String(show.year) : '') : `${fullCode(show, ep)} · ${epName(ep)}`;
+    $('#skipIntro').hidden = true;
+    $('#nextPill').hidden = true;
+    $('#player').hidden = false;
+    document.body.classList.add('playing');
+    document.title = `${code(show, ep) || show.title} · Kinotape`;
+    if (pushHistory) history.pushState({ player: ep.id }, '', location.hash || '#/');
+    else history.replaceState({ player: ep.id }, '', location.hash || '#/');
+    setMediaSession(show, ep);
+    video.play().catch(() => null);
+    wake();
+    video.focus();
+  }
+
+  /** Save, refresh, and open the episode `step` places away with its latest progress. */
+  async function playNeighbour(step) {
+    const target = neighbour(step);
+    if (!target) return;
+    await saveProgress(true);
+    await refresh(true);
+    const fresh = findEpisode(target.id);
+    if (!fresh) return;
+    if (!fresh.ep.in_app) {
+      closePlayer();
+      startEpisode(fresh.ep.id);
+      return;
+    }
+    openPlayer(fresh.show, fresh.ep, false);
+  }
+
+  /** Keep saving progress and show the Skip and Next buttons at the right moments. */
+  function onTimeUpdate() {
+    const video = $('#video');
+    saveProgress(false);
+    const t = video.currentTime, d = video.duration || 0;
+    const series = player.show && player.show.kind === 'series';
+    $('#skipIntro').hidden = !(series && d > 600 && t > 1 && t < 360);
+    $('#nextPill').hidden = !(neighbour(1) && d > 0 && d - t < 100 && $('#upNext').hidden);
+  }
+
+  /** When an episode ends, count down into the next one or offer the way back. */
+  function onEnded() {
+    saveProgress(true);
+    $('#nextPill').hidden = true;
+    const next = neighbour(1);
+    showUpNext(next, next && view.data.autoplay ? 6 : 0);
+  }
+
+  /** The end-of-episode card: the next episode with an optional countdown, or the way back to the library. */
+  function showUpNext(next, seconds) {
+    const card = $('#upNext');
+    clearInterval(player.countdownTimer);
+    if (!next) {
+      card.className = 'up-next solo';
+      card.innerHTML = `<div>
+        <p class="label">${player.show && player.show.kind === 'movie' ? 'The end' : 'That was the last episode in your library'}</p>
+        <div class="up-next-actions"><button class="p-btn solid" type="button" data-player="close">Back to library</button></div>
+      </div>`;
+      card.hidden = false;
+      return;
+    }
+    card.className = 'up-next';
+    card.innerHTML = `<div class="up-next-still"><img src="${still(next)}" alt="" onerror="this.remove()"></div>
+      <div>
+        <p class="label">Next episode</p>
+        <p class="up-next-title">${esc(code(player.show, next))} · ${esc(epName(next))}</p>
+        <p class="up-next-count" id="upNextCount"></p>
+        <div class="up-next-actions">
+          <button class="p-btn solid" type="button" data-player="next">${ICON.play} Play now</button>
+          <button class="p-btn" type="button" data-player="close">Back to library</button>
+        </div>
+      </div>`;
+    card.hidden = false;
+    let left = seconds;
+    const tick = () => { $('#upNextCount').textContent = left > 0 ? `Starts in ${left}s` : ''; };
+    tick();
+    if (seconds > 0) {
+      player.countdownTimer = setInterval(() => {
+        left -= 1;
+        if (left > 0) return tick();
+        clearInterval(player.countdownTimer);
+        playNeighbour(1);
+      }, 1000);
+    }
+  }
+
+  /** Hide the end-of-episode card and stop its countdown. */
+  function clearUpNext() {
+    clearInterval(player.countdownTimer);
+    $('#upNext').hidden = true;
+    $('#upNext').innerHTML = '';
+  }
+
+  /** Jump forward or back by some seconds. */
+  function seekBy(seconds) {
+    const video = $('#video');
+    video.currentTime = Math.max(0, Math.min((video.duration || 0) - 0.5, video.currentTime + seconds));
+  }
+
+  /** Enter or leave full screen with the player's own buttons still on top. */
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => null);
+    else $('#player').requestFullscreen().catch(() => null);
+  }
+
+  /** Show the player's bars, then hide them after a few idle seconds of playback. */
+  function wake() {
+    const el = $('#player');
+    el.classList.remove('idle');
+    clearTimeout(player.idleTimer);
+    player.idleTimer = setTimeout(() => { if (!$('#video').paused && $('#subsMenu').hidden) el.classList.add('idle'); }, 2500);
+  }
+
+  /** Name the episode in the system's Now Playing controls and wire up the media keys. */
+  function setMediaSession(show, ep) {
+    if (!('mediaSession' in navigator)) return;
+    const video = $('#video');
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: show.kind === 'movie' ? show.title : `${code(show, ep)} · ${epName(ep)}`,
+      artist: show.kind === 'movie' ? '' : show.title,
+      artwork: [{ src: new URL(still(ep), location.href).href, sizes: '960x540', type: 'image/jpeg' }],
+    });
+    const actions = {
+      play: () => video.play(),
+      pause: () => video.pause(),
+      seekbackward: () => seekBy(-10),
+      seekforward: () => seekBy(10),
+      nexttrack: neighbour(1) ? () => playNeighbour(1) : null,
+      previoustrack: neighbour(-1) ? () => playNeighbour(-1) : null,
+    };
+    for (const [action, handler] of Object.entries(actions)) {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch (err) {
+        continue;
+      }
+    }
+  }
+
+  /** Leave the player and go back to the library. */
+  function closePlayer() {
+    if (history.state && history.state.player) history.back();
+    else teardownPlayer();
+  }
+
+  /** Stop playback, save the position, and redraw the library with it. */
+  async function teardownPlayer() {
+    const video = $('#video');
+    const saving = saveProgress(true);
+    video.pause();
+    player.ep = null;
+    player.show = null;
+    destroyRenderer();
+    toggleSubtitleMenu(false);
+    clearUpNext();
+    clearTimeout(player.idleTimer);
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => null);
+    video.removeAttribute('src');
+    video.querySelectorAll('track').forEach((t) => t.remove());
+    video.load();
+    $('#player').hidden = true;
+    document.body.classList.remove('playing');
+    document.title = 'Kinotape';
+    if ('mediaSession' in navigator) navigator.mediaSession.metadata = null;
+    await saving;
+    refresh(true);
+  }
+
+  /** When the browser turns out unable to decode a file, offer the system's player instead. */
+  function onVideoError() {
+    if (!player.ep || !$('#video').error) return;
+    const id = player.ep.id;
+    const found = findEpisode(id);
+    closePlayer();
+    if (found) found.ep.in_app = false;
+    startEpisode(id);
+  }
+
+  /** Run one of the player's buttons. */
+  function playerAction(name) {
+    const actions = {
+      close: closePlayer,
+      next: () => playNeighbour(1),
+      skip: () => seekBy(SKIP_SECONDS),
+      fullscreen: toggleFullscreen,
+      subs: () => toggleSubtitleMenu(),
+    };
+    if (actions[name]) actions[name]();
+  }
+
+  /** The player action bound to a key, if any. */
+  function shortcutFor(key) {
+    const video = $('#video');
+    const togglePlay = () => (video.paused ? video.play() : video.pause());
+    return {
+      ' ': togglePlay,
+      k: togglePlay,
+      arrowleft: () => seekBy(-10),
+      j: () => seekBy(-10),
+      arrowright: () => seekBy(10),
+      l: () => seekBy(10),
+      f: toggleFullscreen,
+      m: () => { video.muted = !video.muted; },
+      c: toggleSubtitles,
+      s: () => seekBy(SKIP_SECONDS),
+      n: () => playNeighbour(1),
+      p: () => playNeighbour(-1),
+      escape: () => {
+        if (!$('#subsMenu').hidden) toggleSubtitleMenu(false);
+        else if (!document.fullscreenElement) closePlayer();
+      },
+    }[key.toLowerCase()];
+  }
+
+  /** Keyboard shortcuts while the player is open, caught before Chrome's own video controls see them. */
+  function onPlayerKey(event) {
+    if ($('#player').hidden || event.metaKey || event.ctrlKey || event.altKey) return;
+    const action = shortcutFor(event.key);
+    if (!action) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.repeat && !/^(arrowleft|arrowright|j|l)$/i.test(event.key)) return;
+    action();
+    wake();
+  }
+
+  /** Swallow the release of a shortcut key, which Chrome's video controls would otherwise act on again. */
+  function onPlayerKeyUp(event) {
+    if ($('#player').hidden || !shortcutFor(event.key)) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  /** Flip an episode between watched and unwatched. */
+  async function toggleWatched(id) {
+    const found = findEpisode(id);
+    if (!found) return;
+    const { show, ep } = found;
+    try {
+      await api('/api/mark', { id, watched: !ep.watched });
+      toast(`Marked ${code(show, ep) || show.title} ${ep.watched ? 'unwatched' : 'watched'}`);
+      await refresh(true);
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  /** Report a settings error next to the folder controls, or as a toast elsewhere. */
+  function reportFolderError(message) {
+    const el = $('#folderError');
+    if (el) el.textContent = message;
+    else toast(message);
+  }
+
+  /** Add a local folder, from the system picker or a pasted path. */
+  async function addFolder(path) {
+    try {
+      let folder = path;
+      if (folder === undefined) {
+        const picked = await api('/api/sources/pick', {});
+        if (!picked.path) return;
+        folder = picked.path;
+      }
+      if (!folder.trim()) return;
+      await api('/api/sources/add', { kind: 'local', path: folder });
+      toast('Folder added');
+      await refresh(true);
+    } catch (err) {
+      reportFolderError(err.message);
+    }
+  }
+
+  /** Take a folder or share out of the library. */
+  async function removeSource(id) {
+    const src = view.data.sources.find((s) => s.id === id);
+    if (!src || !confirm(`Remove ${src.name} from Kinotape? The files stay where they are.`)) return;
+    try {
+      await api('/api/sources/remove', { id });
+      toast(`Removed ${src.name}`);
+      await refresh(true);
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  /** Save one setting and confirm it. */
+  async function saveSetting(body, message) {
+    try {
+      await api('/api/settings', body);
+      toast(message);
+      await refresh(true);
+    } catch (err) {
+      toast(err.message);
+    }
+  }
+
+  /** Stop the background server. */
+  async function quitApp() {
+    if (!confirm('Quit Kinotape? Open it again whenever you want to watch.')) return;
+    try { await api('/api/quit', {}); } catch (err) { toast(err.message); return; }
+    document.body.innerHTML = '<main class="wrap"><section class="empty"><h1>Kinotape has quit</h1><p>You can close this window.</p></section></main>';
+  }
+
+  /** Open the network share dialog at its first step and look for servers. */
+  function openShareWizard() {
+    Object.assign(share, { step: 'server', servers: null, host: '', user: '', password: '', domain: '', guest: false, shares: [], share: '', dir: '', dirs: [], busy: false, error: '' });
+    renderShare();
+    $('#shareDialog').showModal();
+    discoverServers();
+  }
+
+  /** Ask Kinotape to look for SMB servers on the network. */
+  async function discoverServers() {
+    share.servers = null;
+    renderShare();
+    try {
+      share.servers = await api('/api/discover');
+    } catch (err) {
+      share.servers = [];
+    }
+    if (share.step === 'server') renderShare();
+  }
+
+  /** Draw the current step of the network share dialog. */
+  function renderShare() {
+    const s = share;
+    const error = s.error ? `<p class="form-error" role="alert">${esc(s.error)}</p>` : '<p class="form-error" role="alert"></p>';
+    const busy = s.busy ? '<span class="spinner"></span> ' : '';
+    let html = '';
+    if (s.step === 'server') {
+      const list = s.servers === null
+        ? '<li class="hint"><span class="spinner"></span> Looking for servers on your network…</li>'
+        : s.servers.length
+          ? s.servers.map((srv) => `<li><button class="pick" type="button" data-server="${esc(srv.address)}">${ICON.network}<span><strong>${esc(srv.name || srv.address)}</strong><span>${esc(srv.name ? srv.address : 'SMB server')}</span></span></button></li>`).join('')
+          : '<li class="hint">No servers answered. Type the address below, or check that file sharing is on.</li>';
+      html = `<h2 id="shareTitle">Add a network share</h2>
+        <p class="hint">Pick the computer or NAS that shares your videos.</p>
+        <ul class="pick-list">${list}</ul>
+        <label class="field"><span>Or type its name or address</span><input id="shareHost" type="text" placeholder="192.168.1.20 or nas.local" value="${esc(s.host)}" spellcheck="false" autocomplete="off"></label>
+        ${error}
+        <div class="sheet-end"><button class="btn ghost" type="button" data-share="rescan">Look again</button>
+          <span class="row-actions"><button class="btn" type="button" data-share="cancel">Cancel</button><button class="btn primary" type="button" data-share="to-login">Next</button></span></div>`;
+    } else if (s.step === 'login') {
+      html = `<h2 id="shareTitle">Sign in to ${esc(s.host)}</h2>
+        <p class="hint">Use the account that can open the share. Kinotape keeps the password in your system’s keychain.</p>
+        <label class="check" style="margin-bottom:14px"><input type="checkbox" id="shareGuest" ${s.guest ? 'checked' : ''}><span><strong>Connect as a guest</strong></span></label>
+        <div id="shareCreds" ${s.guest ? 'hidden' : ''}>
+          <label class="field"><span>User name</span><input id="shareUser" type="text" value="${esc(s.user)}" autocomplete="username" spellcheck="false"></label>
+          <label class="field"><span>Password</span><input id="sharePassword" type="password" value="${esc(s.password)}" autocomplete="current-password"></label>
+          <label class="field"><span>Domain or workgroup (usually empty)</span><input id="shareDomain" type="text" value="${esc(s.domain)}" spellcheck="false"></label>
+        </div>
+        ${error}
+        <div class="sheet-end"><button class="btn" type="button" data-share="back-server">Back</button>
+          <button class="btn primary" type="button" data-share="connect" ${s.busy ? 'disabled' : ''}>${busy}Connect</button></div>`;
+    } else if (s.step === 'share') {
+      const list = s.shares.length
+        ? s.shares.map((item) => `<li><button class="pick" type="button" data-pick-share="${esc(item.name)}">${ICON.share}<span><strong>${esc(item.name)}</strong><span>${esc(item.comment || 'Shared folder')}</span></span></button></li>`).join('')
+        : '<li class="hint">This account can’t see any shared folders on the server.</li>';
+      html = `<h2 id="shareTitle">Pick a share</h2>
+        <p class="hint">Shared folders on ${esc(s.host)}.</p>
+        <ul class="pick-list">${list}</ul>
+        <label class="field"><span>Or type the share’s name</span>
+          <span class="inline"><input id="shareName" type="text" placeholder="Media" spellcheck="false" autocomplete="off"><button class="btn" type="button" data-share="named">Open</button></span></label>
+        ${error}
+        <div class="sheet-end"><button class="btn" type="button" data-share="back-login">Back</button><span></span></div>`;
+    } else {
+      const parts = s.dir ? s.dir.split('/') : [];
+      const crumbs = [`<button type="button" data-crumb="">${esc(s.share)}</button>`]
+        .concat(parts.map((part, i) => `<span>/</span><button type="button" data-crumb="${esc(parts.slice(0, i + 1).join('/'))}">${esc(part)}</button>`)).join('');
+      const list = s.busy
+        ? '<li class="hint"><span class="spinner"></span> Opening…</li>'
+        : s.dirs.length
+          ? s.dirs.map((d) => `<li><button class="pick" type="button" data-open-dir="${esc(d)}">${ICON.folder}<span><strong>${esc(d)}</strong></span></button></li>`).join('')
+          : '<li class="hint">No folders inside. Add this one, or go back up.</li>';
+      html = `<h2 id="shareTitle">Choose the folder</h2>
+        <p class="hint">Kinotape scans the folder you add and everything inside it.</p>
+        <div class="crumbs">${crumbs}</div>
+        <ul class="pick-list">${list}</ul>
+        ${error}
+        <div class="sheet-end"><button class="btn" type="button" data-share="back-share">Back</button>
+          <button class="btn primary" type="button" data-share="add" ${s.busy ? 'disabled' : ''}>Add ${esc(s.dir ? s.dir.split('/').pop() : s.share)}</button></div>`;
+    }
+    $('#shareSheet').innerHTML = html;
+  }
+
+  /** Read the sign-in fields into the dialog state. */
+  function readShareLogin() {
+    share.guest = !!($('#shareGuest') && $('#shareGuest').checked);
+    share.user = share.guest ? '' : ($('#shareUser') ? $('#shareUser').value.trim() : share.user);
+    share.password = share.guest ? '' : ($('#sharePassword') ? $('#sharePassword').value : share.password);
+    share.domain = share.guest ? '' : ($('#shareDomain') ? $('#shareDomain').value.trim() : share.domain);
+  }
+
+  /** The login part of every share request. */
+  function shareLogin(extra) {
+    return Object.assign({ host: share.host, user: share.user, password: share.password, domain: share.domain }, extra || {});
+  }
+
+  /** List the folders inside the chosen share folder. */
+  async function loadShareDirs(dir) {
+    share.dir = dir;
+    share.busy = true;
+    share.error = '';
+    renderShare();
+    try {
+      share.dirs = await api('/api/smb/dirs', shareLogin({ share: share.share, dir }));
+    } catch (err) {
+      share.dirs = [];
+      share.error = err.message;
+    }
+    share.busy = false;
+    renderShare();
+  }
+
+  /** Handle a button inside the network share dialog. */
+  async function shareAction(action) {
+    share.error = '';
+    if (action === 'cancel') return $('#shareDialog').close();
+    if (action === 'rescan') return discoverServers();
+    if (action === 'to-login') {
+      share.host = $('#shareHost').value.trim() || share.host;
+      if (!share.host) {
+        share.error = 'Pick a server, or type its name or address.';
+        return renderShare();
+      }
+      share.step = 'login';
+      renderShare();
+      const field = $('#shareUser');
+      if (field) field.focus();
+      return;
+    }
+    if (action === 'back-server') { share.step = 'server'; return renderShare(); }
+    if (action === 'back-login') { share.step = 'login'; return renderShare(); }
+    if (action === 'back-share') { share.step = 'share'; return renderShare(); }
+    if (action === 'connect') {
+      readShareLogin();
+      share.busy = true;
+      renderShare();
+      try {
+        share.shares = await api('/api/smb/shares', shareLogin());
+      } catch (err) {
+        share.shares = [];
+        share.error = `${err.message} You can still type the share’s name.`;
+      }
+      share.step = 'share';
+      share.busy = false;
+      return renderShare();
+    }
+    if (action === 'named') {
+      const name = $('#shareName').value.trim().replace(/^[\\/]+|[\\/]+$/g, '');
+      if (!name) return;
+      share.share = name;
+      share.step = 'dir';
+      return loadShareDirs('');
+    }
+    if (action === 'add') {
+      share.busy = true;
+      renderShare();
+      try {
+        await api('/api/sources/add', shareLogin({ kind: 'smb', share: share.share, dir: share.dir }));
+        $('#shareDialog').close();
+        toast(`Added ${share.dir ? share.dir.split('/').pop() : share.share}. Scanning…`);
+        await refresh(true);
+      } catch (err) {
+        share.error = err.message;
+        share.busy = false;
+        renderShare();
+      }
+    }
+  }
+
+  /** Point the page at a new address, redrawing it. */
+  function go(hash) {
+    if (location.hash === hash) render();
+    else location.hash = hash;
+  }
+
+  document.addEventListener('click', (event) => {
+    if (!$('#subsMenu').hidden && !event.target.closest('.p-menu-wrap')) toggleSubtitleMenu(false);
+    const el = event.target.closest('[data-play],[data-player],[data-sub],[data-mark],[data-action],[data-group],[data-genre],[data-remove],[data-share],[data-server],[data-pick-share],[data-open-dir],[data-crumb]');
+    if (!el) return;
+    const d = el.dataset;
+    if (d.sub !== undefined) chooseSubtitle(Number(d.sub));
+    else if (d.play) startEpisode(d.play);
+    else if (d.player) playerAction(d.player);
+    else if (d.mark) toggleWatched(d.mark);
+    else if (d.group) {
+      view.group = d.group;
+      view.genre = '';
+      try { localStorage.setItem('kinotape.group', d.group); } catch (err) { view.group = d.group; }
+      render();
+    } else if (d.genre !== undefined) {
+      view.group = 'genre';
+      view.genre = view.genre === d.genre ? '' : d.genre;
+      view.query = '';
+      $('#search').value = '';
+      go('#/');
+      render();
+    } else if (d.remove) removeSource(d.remove);
+    else if (d.share) shareAction(d.share);
+    else if (d.server !== undefined) { share.host = d.server; shareAction('to-login'); }
+    else if (d.pickShare !== undefined) { share.share = d.pickShare; share.step = 'dir'; loadShareDirs(''); }
+    else if (d.openDir !== undefined) loadShareDirs(share.dir ? `${share.dir}/${d.openDir}` : d.openDir);
+    else if (d.crumb !== undefined) loadShareDirs(d.crumb);
+    else if (d.action === 'pick-folder') addFolder();
+    else if (d.action === 'add-path') addFolder($('#folderPath').value);
+    else if (d.action === 'add-share') openShareWizard();
+    else if (d.action === 'rescan') api('/api/rescan', {}).then(() => refresh(true)).catch((err) => toast(err.message));
+    else if (d.action === 'save-tmdb') saveSetting({ tmdb_key: $('#tmdbKey').value }, $('#tmdbKey').value.trim() ? 'TMDB key saved' : 'TMDB key removed');
+    else if (d.action === 'quit') quitApp();
+    else if (d.action === 'close-cant-play') $('#cantPlay').close();
+    else if (d.action === 'open-external') openExternally();
+  });
+  document.addEventListener('change', (event) => {
+    if (event.target.id === 'autoplayToggle') saveSetting({ autoplay: event.target.checked }, event.target.checked ? 'The next episode will start by itself' : 'Playback will stop after each episode');
+    if (event.target.id === 'artworkToggle') saveSetting({ artwork: event.target.checked }, event.target.checked ? 'Looking up posters and genres' : 'Posters and genres are off');
+    if (event.target.id === 'shareGuest') { readShareLogin(); renderShare(); }
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && event.target.id === 'folderPath') addFolder(event.target.value);
+    if (event.key === 'Enter' && event.target.id === 'shareHost') shareAction('to-login');
+    if (event.key === 'Enter' && event.target.id === 'shareName') shareAction('named');
+    if (event.key === 'Enter' && ['shareUser', 'sharePassword', 'shareDomain'].includes(event.target.id)) shareAction('connect');
+    if (event.key === '/' && $('#player').hidden && !/^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) && !document.querySelector('dialog[open]')) {
+      event.preventDefault();
+      $('#search').focus();
+    }
+  });
+  $('#search').addEventListener('input', (event) => {
+    view.query = event.target.value;
+    if (route().name !== 'home') go('#/');
+    else render();
+  });
+  const videoEl = $('#video');
+  videoEl.addEventListener('timeupdate', onTimeUpdate);
+  videoEl.addEventListener('pause', () => { saveProgress(true); wake(); });
+  videoEl.addEventListener('play', wake);
+  videoEl.addEventListener('seeked', () => saveProgress(true));
+  videoEl.addEventListener('ended', onEnded);
+  videoEl.addEventListener('error', onVideoError);
+  videoEl.addEventListener('dblclick', toggleFullscreen);
+  $('#player').addEventListener('mousemove', wake);
+  window.addEventListener('keydown', onPlayerKey, true);
+  window.addEventListener('keyup', onPlayerKeyUp, true);
+  window.addEventListener('hashchange', () => { view.introDone = false; render(); window.scrollTo(0, 0); });
+  window.addEventListener('popstate', () => { if (!$('#player').hidden) teardownPlayer(); });
+  window.addEventListener('pagehide', () => saveProgress(true));
+  window.addEventListener('focus', () => refresh(false));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(false); });
+  setInterval(() => { if (!document.hidden) refresh(false); }, 10000);
+  refresh(true);
+</script>
+</body>
+</html>
